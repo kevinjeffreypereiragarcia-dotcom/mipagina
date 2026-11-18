@@ -41,7 +41,13 @@ body {
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
-}iframe { display: none !important; }
+}
+
+iframe {
+    display: none !important;
+}
+
 button, a, input, [role="button"] {
-  touch-action: manipulation;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
