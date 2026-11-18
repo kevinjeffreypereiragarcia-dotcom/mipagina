@@ -58,3 +58,9 @@ app-header-login-responsive, [class*="login-responsive"], #dropdownLogin {
     pointer-events: auto !important;
     touch-action: manipulation !important;
 }
+@media (max-width: 768px) {
+  .login-container {
+    width: 90% !important;
+    margin: 0 auto !important;
+  }
+}
